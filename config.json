@@ -1,0 +1,32 @@
+{
+  "outdir": "./output",
+  "clientID": "54f94b86-0b0f-4027-bb23-32e47b7baba3",
+  "mapping": {
+    "us": "45.50.96.71",
+    "uk": "51.89.255.67",
+    "ca": "23.227.38.65",
+    "de": "91.107.201.140",
+    "fr": "51.210.0.1",
+    "es": "82.98.134.10",
+    "it": "82.50.39.1",
+    "mx": "187.174.0.1",
+    "ar": "181.5.200.1",
+    "br": "179.93.224.1",
+    "cl": "186.78.49.1",
+    "no": "62.50.173.1",
+    "se": "80.217.1.1",
+    "dk": "62.44.180.1"
+  },
+  "all": true,
+  "group": "country",
+  "regionalize": false,
+  "excludeGroups": false,
+  "excludeChannels": false,
+  "uniqueClientid": false,
+  "randomClientid": false,
+  "refresh": 0,
+  "xTvgUrl": false,
+  "ondemand": false,
+  "vlcopts": false,
+  "pipeopts": false
+}

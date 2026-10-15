@@ -1,0 +1,24 @@
+name: One-time History Reset
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - name: Gzip raw XML, drop raw files
+        run: |
+          find . -type f -name '*.xml' -not -path './.git/*' -print0 | xargs -0 -r -n1 gzip -f
+          find . -type f -name '*.xml' -not -path './.git/*' -delete
+      - name: Collapse history and force-push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git checkout --orphan clean
+          git add -A
+          git commit -m "Collapse auto-update history"
+          git branch -D main
+          git branch -m main
+          git push -f origin main

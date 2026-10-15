@@ -1,0 +1,56 @@
+name: Auto Pluto Update
+
+on:
+  schedule:
+    # Every 3 hours, at :25 past. Deliberately OFF the top of the hour:
+    # GitHub's scheduler is busiest at :00, where runs get delayed or dropped
+    # (that's why your hourly runs weren't landing hourly).
+    - cron: '25 */3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v6.0.2
+        with:
+          # Push using a personal access token when one is set, so the hourly
+          # commits count as YOUR account activity and GitHub never auto-disables
+          # the schedule after 60 days of "inactivity". Falls back to the default
+          # token if the KEEPALIVE_PAT secret isn't configured yet, so the repo
+          # keeps working either way.
+          token: ${{ secrets.KEEPALIVE_PAT || github.token }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v6.3.0
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run scraper
+        run: node index.js
+
+      - name: Gzip every XML guide and drop the raw .xml
+        run: |
+          # Compress every generated guide to <name>.xml.gz (gzip -f removes the
+          # source .xml). Covers the whole tree, not just plutotv_all.xml.
+          find . -type f -name '*.xml' -not -path './.git/*' -print0 \
+            | xargs -0 -r -n1 gzip -f
+          # Safety net: delete any raw .xml still lying around (e.g. an old one
+          # committed before this change) so only .xml.gz remains in the repo.
+          find . -type f -name '*.xml' -not -path './.git/*' -delete
+
+      - name: Commit files
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "actions@github.com"
+          git add -A          # -A also stages the deletions of the old raw .xml
+          git commit -m "Auto update playlist" || echo "No changes"
+          git push --force
